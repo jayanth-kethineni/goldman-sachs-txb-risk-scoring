@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: goldman-sachs-txb-risk-scoring
+  datasource:
+    url: jdbc:postgresql://postgres:5432/txb_risk
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,metrics
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Resilience4j Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    instances:
+      transactionHistory:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+
+# Application-specific configuration
+txb:
+  risk:
+    # High-risk countries (ISO 3166-1 alpha-2 codes)
+    high-risk-countries: AF,BY,CF,CD,CU,ER,GW,HT,IR,IQ,KP,LB,LY,ML,MM,NI,RU,SO,SS,SD,SY,VE,YE,ZW
+    # Scoring thresholds
+    risk-threshold-low: 300
+    risk-threshold-medium: 500
+    risk-threshold-high: 700
+    # Audit trail enabled
+    audit-enabled: true

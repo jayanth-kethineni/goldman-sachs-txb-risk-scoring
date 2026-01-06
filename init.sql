@@ -1,8 +1,11 @@
+-- Enable pgcrypto extension for gen_random_uuid()
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Create transaction_risk_scores table
 CREATE TABLE IF NOT EXISTS transaction_risk_scores (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     transaction_id VARCHAR(255) NOT NULL UNIQUE,
-    risk_score SMALLINT NOT NULL,
+    risk_score INTEGER NOT NULL,
     risk_level VARCHAR(20) NOT NULL,
     reason_codes TEXT[],
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

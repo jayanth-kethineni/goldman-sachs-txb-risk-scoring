@@ -48,8 +48,8 @@ txb:
     # High-risk countries (ISO 3166-1 alpha-2 codes)
     high-risk-countries: AF,BY,CF,CD,CU,ER,GW,HT,IR,IQ,KP,LB,LY,ML,MM,NI,RU,SO,SS,SD,SY,VE,YE,ZW
     # Scoring thresholds
-    risk-threshold-low: 300
-    risk-threshold-medium: 500
-    risk-threshold-high: 700
+    risk-threshold-medium: 200
+    risk-threshold-high: 400
+    risk-threshold-critical: 600
     # Audit trail enabled
     audit-enabled: true

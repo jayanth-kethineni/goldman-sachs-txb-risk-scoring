@@ -1,0 +1,5 @@
+- Architected and delivered a production-grade, real-time transaction risk scoring microservice for a simulated Goldman Sachs Transaction Banking (TxB) platform, handling high-value corporate payments with sub-100ms latency.
+- Implemented a deterministic, rule-based engine in Java 17 and Spring Boot, ensuring full explainability and auditability for regulatory compliance, a non-negotiable requirement for financial systems.
+- Engineered a financial-grade, immutable audit trail using PostgreSQL with ACID guarantees, persisting every risk decision for forensic analysis and creating a verifiable system of record.
+- Integrated resilience patterns, including a Resilience4j circuit breaker on critical data dependencies, to ensure graceful degradation and prevent cascading failures, maintaining system availability during downstream outages.
+- Deployed the service as a fully containerized application using Docker and Docker Compose, with integrated Prometheus metrics for comprehensive observability into system health, latency, and throughput.

@@ -1,19 +1,17 @@
 package com.goldmansachs.txb.domain.model;
 
-import lombok.Builder;
-import lombok.Value;
-
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
-@Value
-@Builder
-public class Transaction {
-    String transactionId;
-    String clientId;
-    String beneficiaryId;
-    String beneficiaryCountry;
-    BigDecimal amount;
-    String currency;
-    Instant timestamp;
-}
+/**
+ * Represents a financial transaction. This is an immutable record to ensure data integrity.
+ */
+public record Transaction(
+    String transactionId,
+    String clientId,
+    String beneficiaryId,
+    BigDecimal amount,
+    String currency,
+    OffsetDateTime transactionTime,
+    String country
+) {}

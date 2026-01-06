@@ -30,3 +30,8 @@ build/
 
 ### VS Code ###
 .vscode/
+target/
+.idea/
+.vscode/
+*.log
+.DS_Store

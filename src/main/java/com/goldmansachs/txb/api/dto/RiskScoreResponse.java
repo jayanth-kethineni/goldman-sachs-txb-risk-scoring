@@ -1,21 +1,14 @@
 package com.goldmansachs.txb.api.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class RiskScoreResponse {
-    
-    private String transactionId;
-    private Integer riskScore;
-    private String riskLevel;
-    private List<String> reasonCodes;
-    private Long calculationTimeMs;
-}
+/**
+ * Response DTO for risk score calculation.
+ * Contains the transaction ID, numeric score, risk level, and reason codes.
+ */
+public record RiskScoreResponse(
+    String transactionId,
+    int riskScore,
+    String riskLevel,
+    List<String> reasonCodes
+) {}

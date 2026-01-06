@@ -2,13 +2,16 @@ package com.goldmansachs.txb.engine;
 
 import com.goldmansachs.txb.domain.model.Transaction;
 
+/**
+ * Interface for all risk rules.
+ * Each rule evaluates a transaction and produces a risk signal.
+ */
 public interface RiskRule {
-    
     /**
-     * Evaluates the transaction and returns a risk signal if the rule is triggered.
+     * Evaluates the transaction against this rule.
      * 
      * @param transaction The transaction to evaluate
-     * @return RiskSignal if the rule is triggered, null otherwise
+     * @return A RiskSignal indicating whether the rule was triggered and its weight
      */
     RiskSignal evaluate(Transaction transaction);
 }

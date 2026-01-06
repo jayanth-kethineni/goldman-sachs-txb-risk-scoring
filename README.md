@@ -1,95 +1,99 @@
 # Goldman Sachs TxB - Real-Time Transaction Risk Scoring Service
 
-This project is a production-grade implementation of a real-time transaction risk scoring service for Goldman Sachs' Transaction Banking (TxB) platform. It demonstrates mastery of financial-grade system design, including regulatory compliance, audit trails, and high-availability patterns.
+This project is a production-grade implementation of a real-time, explainable transaction risk scoring service, designed to meet the stringent requirements of Goldman Sachs' Transaction Banking (TxB) platform. It is built to be reviewed by internal engineering, compliance, and regulatory bodies.
 
-## The Problem: Real-Time Risk Assessment at Scale
+## 1. Business Problem
 
-Goldman Sachs TxB processes billions of dollars in payments daily. Each transaction must be assessed for risk in real-time to prevent fraud, money laundering, and sanctions violations. The system must be:
+Goldman Sachs TxB processes high-value, time-sensitive corporate payments. To protect the firm and its clients from financial crime, each transaction must be scored for fraud and compliance risk in real-time before execution. The system must provide decisions that are **fast**, **explainable**, **auditable**, and **resilient**.
 
-- **Fast:** Sub-100ms latency to avoid impacting payment processing times
-- **Accurate:** Minimize false positives (blocking legitimate transactions) and false negatives (allowing fraudulent transactions)
-- **Compliant:** Adhere to strict regulatory requirements (e.g., OFAC, AML)
-- **Auditable:** Maintain a complete, immutable record of every risk decision
-- **Resilient:** Tolerate failures in downstream systems without compromising risk assessment
+## 2. Architectural Principles
 
-## The Solution: A Production-Grade Risk Scoring Engine
+The system is designed around non-negotiable architectural constraints that prioritize regulatory compliance and production stability:
 
-This project implements a real-time risk scoring engine with the following features:
+- **Explainability & Determinism**: A **rule-based engine** was chosen over machine learning to ensure every risk decision is transparent and reproducible for regulators.
+- **Real-Time Decisioning**: A **synchronous REST API** provides immediate feedback required by upstream payment processing workflows.
+- **Financial Correctness**: **PostgreSQL** is used for its strong ACID guarantees, ensuring data integrity for audit trails and historical analysis.
+- **Resilience**: A **circuit breaker** pattern is implemented on the transaction history dependency to prevent cascading failures and ensure graceful degradation.
+- **Immutability**: Domain models (`Transaction`, `RiskScore`) are implemented as immutable Java 17 records to ensure thread safety and system correctness.
 
-- **Rule-Based Scoring:** Explainable, auditable risk scoring with 4 key rules:
-  - `NEW_BENEFICIARY`: Detects payments to new beneficiaries
-  - `HIGH_VALUE_TRANSACTION`: Flags transactions significantly larger than the client's average
-  - `HIGH_RISK_COUNTRY`: Checks against a configurable list of sanctioned countries
-  - `UNUSUAL_TIME_OF_DAY`: Flags transactions outside of normal business hours
-- **Financial-Grade Audit Trail:** Every risk score is recorded in a dedicated `transaction_risk_scores` table with a timestamp and system user
-- **Resilience Patterns:** Circuit breaker on the transaction history service to prevent cascading failures
-- **Observability:** Prometheus metrics for monitoring latency, throughput, and error rates
-- **Clean Architecture:** Strict separation of concerns (API → Domain → Engine → Infrastructure)
+For a detailed breakdown of architectural decisions and tradeoffs, see `ARCHITECTURE.md`.
 
-## Architecture Diagram
+## 3. Core Features
 
-```mermaid
-graph TD
-    subgraph API Layer
-        A[REST API] --> B{RiskScoringController}
-    end
+- **Clean Architecture**: The system follows a clean, layered architecture (`API` → `Domain` → `Engine` → `Infrastructure`) for maintainability and separation of concerns.
+- **Rule-Based Scoring Engine**: A deterministic engine evaluates a set of configurable risk rules:
+  - `NEW_BENEFICIARY`: +150 points
+  - `HIGH_VALUE_TRANSACTION`: +200 points
+  - `HIGH_RISK_COUNTRY`: +250 points
+  - `UNUSUAL_TIME_OF_DAY`: +100 points
+- **Financial-Grade Audit Trail**: Every scoring decision is persisted as an immutable, append-only record in a dedicated PostgreSQL table for compliance and forensic analysis.
+- **Observability**: The service is instrumented with **Prometheus metrics** to monitor API latency, throughput, and error rates, providing critical visibility into production health.
+- **Production-Ready Deployment**: The entire stack is containerized using **Docker Compose**, enabling consistent, one-command deployments.
 
-    subgraph Domain Layer
-        B --> C{RiskScoringService}
-        C --> D[RiskScoringEngine]
-    end
+## 4. API Contract
 
-    subgraph Infrastructure Layer
-        D --> E[TransactionHistoryRepository]
-        C --> F[AuditService]
-        F --> G[TransactionRiskScoreRepository]
-    end
+**Endpoint**: `POST /v1/scores/calculate`
 
-    subgraph External Systems
-        E --> H[(PostgreSQL)]
-        G --> H
-    end
+Calculates a risk score for a new transaction.
+
+**Request Body**:
+
+```json
+{
+  "transactionId": "TXN-DEMO-001",
+  "clientId": "CLIENT-001",
+  "beneficiaryId": "BENEFICIARY-001",
+  "amount": 10000.00,
+  "currency": "USD",
+  "transactionTime": "2024-01-15T14:30:00Z",
+  "country": "US"
+}
 ```
 
-## How to Run
+**Success Response (200 OK)**:
 
-1.  **Start the stack:**
+```json
+{
+  "transactionId": "TXN-DEMO-001",
+  "riskScore": 100,
+  "riskLevel": "LOW",
+  "reasonCodes": []
+}
+```
+
+## 5. How to Run Locally
+
+**Prerequisites**: Docker and Docker Compose must be installed.
+
+1.  **Build and Start the Stack**:
+
     ```bash
-    docker-compose up --build
+    docker-compose up --build -d
     ```
 
-2.  **Run the demo:**
+    This command will:
+    - Build the Spring Boot application JAR.
+    - Start the PostgreSQL, Prometheus, and application containers.
+    - Initialize the database schema and seed data using `init.sql`.
+
+2.  **Run the 60-Second Demo Script**:
+
+    The `demo.sh` script simulates four transactions, demonstrating LOW, MEDIUM, HIGH, and CRITICAL risk scenarios.
+
     ```bash
     ./demo.sh
     ```
 
-## Positioning for Hiring
+3.  **Access Supporting Services**:
+    - **Prometheus Dashboard**: [http://localhost:9090](http://localhost:9090)
+    - **PostgreSQL (Audit Trail)**:
+      ```bash
+      docker exec -it gs-txb-postgres psql -U postgres -d txb_risk
+      ```
+      Then run: `SELECT * FROM transaction_risk_scores;`
 
-This project demonstrates:
+4.  **Shut Down the Stack**:
 
-- **Financial Systems Expertise:** Understanding of compliance, audit, and risk in a banking context
-- **Production-Grade Thinking:** Resilience, observability, and clean architecture
-- **Explicit Tradeoffs:** Documented decisions in `ARCHITECTURE.md`
-- **Mastery of Java + Spring Boot:** Production-ready code with best practices
-
-### 60-Second Demo Flow
-
-1.  Run `./demo.sh`
-2.  Show the 4 scenarios: LOW, MEDIUM, HIGH, CRITICAL risk
-3.  Explain how the rules engine combines signals to produce a score
-4.  Show the audit trail in PostgreSQL: `docker exec -it gs-txb-postgres psql -U postgres -d txb_risk -c 'SELECT * FROM transaction_risk_scores;'`
-5.  Show the Prometheus dashboard: `http://localhost:9090`
-
-### Interviewer Questions
-
-- **Why a rule-based engine instead of ML?** Explainability and auditability are paramount in financial systems. Regulators require clear, deterministic reasons for every decision.
-- **How would you handle a new regulatory requirement?** Add a new `RiskRule` implementation and deploy. The system is designed for extensibility.
-- **How would you scale this to 10,000 transactions per second?** Horizontal scaling of the Spring Boot application, read replicas for PostgreSQL, and potentially a distributed cache like Redis for hot data.
-- **What are the limitations of this system?** It's not a full AML solution. It's a real-time risk scoring engine that would feed into a larger compliance workflow.
-
-### Resume Bullets
-
-- Designed and built a production-grade, real-time transaction risk scoring service for a simulated Goldman Sachs TxB platform, demonstrating mastery of financial-grade system design
-- Implemented a rule-based scoring engine with 4 key risk rules, achieving sub-100ms latency and high accuracy
-- Engineered a financial-grade audit trail with immutable records for regulatory compliance
-- Integrated resilience patterns (circuit breakers) and observability (Prometheus) to ensure high availability and production-readiness
+    ```bash
+    docker-compose down
+    ```

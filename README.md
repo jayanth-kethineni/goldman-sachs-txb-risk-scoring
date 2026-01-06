@@ -2,6 +2,8 @@
 
 This project is a production-grade implementation of a real-time, explainable transaction risk scoring service, designed to meet the stringent requirements of Goldman Sachs' Transaction Banking (TxB) platform. It is built to be reviewed by internal engineering, compliance, and regulatory bodies.
 
+This project is independently built for learning and portfolio purposes and is not affiliated with Goldman Sachs.
+
 ## 1. Business Problem
 
 Goldman Sachs TxB processes high-value, time-sensitive corporate payments. To protect the firm and its clients from financial crime, each transaction must be scored for fraud and compliance risk in real-time before execution. The system must provide decisions that are **fast**, **explainable**, **auditable**, and **resilient**.
